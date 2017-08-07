@@ -24,8 +24,8 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
-- cmremote: Add git remote for LineageOS Gerrit Review
-- cmgerrit: A Git wrapper that fetches/pushes patch from/to LineageOS Gerrit Review
+- cmremote: Add git remote for iCadiomOS Gerrit Review
+- cmgerrit: A Git wrapper that fetches/pushes patch from/to iCadiomOS Gerrit Review
 - cmrebase: Rebase a Gerrit change and push it again
 - aospremote: Add git remote for matching AOSP repository
 - cafremote: Add git remote for matching CodeAurora repository.
@@ -84,8 +84,8 @@ function check_product()
         return
     fi
 
-    if (echo -n $1 | grep -q -e "^lineage_") ; then
-        CM_BUILD=$(echo -n $1 | sed -e 's/^lineage_//g')
+    if (echo -n $1 | grep -q -e "^icadiom_") ; then
+        CM_BUILD=$(echo -n $1 | sed -e 's/^icadiom_//g')
         export BUILD_NUMBER=$((date +%s%N ; echo $CM_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10)
     else
         # Fall back to cm_<product>
@@ -574,11 +574,11 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the Lineage model name
+            # This is probably just the iCadiom model name
             if [ -z "$variant" ]; then
                 variant="userdebug"
             fi
-            lunch lineage_$target-$variant
+            lunch icadiom_$target-$variant
             if [ $? -ne 0 ]; then
                 # try CM
                 echo "** Warning: '$target' is using CM-based makefiles. This will be deprecated in the next major release."
@@ -745,8 +745,8 @@ function tapas()
 function eat()
 {
     if [ "$OUT" ] ; then
-        MODVERSION=$(get_build_var LINEAGE_VERSION)
-        ZIPFILE=lineage-$MODVERSION.zip
+        MODVERSION=$(get_build_var ICADIOM_VERSION)
+        ZIPFILE=icadiom-$MODVERSION.zip
         ZIPPATH=$OUT/$ZIPFILE
         if [ ! -f $ZIPPATH ] ; then
             echo "Nothing to eat"
@@ -1703,12 +1703,12 @@ function cmremote()
     fi
     git remote rm cmremote 2> /dev/null
     GERRIT_REMOTE=$(git config --get remote.github.projectname)
-    CMUSER=$(git config --get review.review.lineageos.org.username)
+    CMUSER=$(git config --get review.review.icadiomos.org.username)
     if [ -z "$CMUSER" ]
     then
-        git remote add cmremote ssh://review.lineageos.org:29418/$GERRIT_REMOTE
+        git remote add cmremote ssh://review.icadiomos.org:29418/$GERRIT_REMOTE
     else
-        git remote add cmremote ssh://$CMUSER@review.lineageos.org:29418/$GERRIT_REMOTE
+        git remote add cmremote ssh://$CMUSER@review.icadiomos.org:29418/$GERRIT_REMOTE
     fi
     echo "Remote 'cmremote' created"
 }
@@ -1865,7 +1865,7 @@ function cmgerrit() {
         $FUNCNAME help
         return 1
     fi
-    local user=`git config --get review.review.lineageos.org.username`
+    local user=`git config --get review.review.icadiomos.org.username`
     local review=`git config --get remote.github.review`
     local project=`git config --get remote.github.projectname`
     local command=$1
@@ -2100,7 +2100,7 @@ function cmrebase() {
     local dir="$(gettop)/$repo"
 
     if [ -z $repo ] || [ -z $refs ]; then
-        echo "LineageOS Gerrit Rebase Usage: "
+        echo "iCadiomOS Gerrit Rebase Usage: "
         echo "      cmrebase <path to project> <patch IDs on Gerrit>"
         echo "      The patch IDs appear on the Gerrit commands that are offered."
         echo "      They consist on a series of numbers and slashes, after the text"
@@ -2122,7 +2122,7 @@ function cmrebase() {
     echo "Bringing it up to date..."
     repo sync .
     echo "Fetching change..."
-    git fetch "http://review.lineageos.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
+    git fetch "http://review.icadiomos.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
     if [ "$?" != "0" ]; then
         echo "Error cherry-picking. Not uploading!"
         return
